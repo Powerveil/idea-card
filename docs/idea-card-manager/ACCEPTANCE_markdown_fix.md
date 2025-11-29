@@ -1,43 +1,43 @@
-# ACCEPTANCE: Markdown Rendering Fix & Enhancement
+# 验收报告：Markdown 渲染修复与增强
 
-## 1. Context
-The original Markdown parser in `IdeaCard.vue` had several limitations:
-- **Rendering Issues**: Failed to render bold text correctly when mixed with Chinese characters or specific symbols (e.g., `**“检查器（Checker）”**`).
-- **List Conflicts**: List markers (`*`, `-`) conflicted with bold/italic markers, causing broken rendering.
-- **Layout Issues**: Excessive whitespace and gaps in card previews due to poor line handling and default styling.
-- **Missing Features**: Lack of support for headings and proper list structures.
+## 1. 背景
+`IdeaCard.vue` 中原始的 Markdown 解析器存在以下局限性：
+- **渲染问题**：当粗体文本与中文字符或特定符号混合时（例如 `**“检查器（Checker）”**`），渲染失败。
+- **列表冲突**：列表标记（`*`、`-`）与粗体/斜体标记冲突，导致渲染错误。
+- **布局问题**：由于行处理不当和默认样式，卡片预览中存在过多的空白和间距。
+- **功能缺失**：缺乏对标题和正确列表结构的支持。
 
-## 2. Implemented Solutions
+## 2. 解决方案
 
-### 2.1 Robust Line-by-Line Parsing
-- **Strategy**: Switched from global regex replacement to a **line-by-line processing** approach.
-- **Benefit**: Isolates each line's context, preventing cross-line pollution and regex conflicts between different Markdown elements.
+### 2.1 稳健的逐行解析
+- **策略**：从全局正则替换切换为**逐行处理**策略。
+- **优势**：隔离每一行的上下文，防止跨行污染以及不同 Markdown 元素之间的正则冲突。
 
-### 2.2 Enhanced Feature Support
-- **Lists**: Added support for unordered lists (`- item`, `* item`).
-  - *Implementation*: Detects list markers per line and wraps content in `<ul><li>...</li></ul>` with inline styles (`margin: 0; padding-left: 20px`) for correct indentation in cards.
-- **Headings**: Added support for headings (`#` to `######`).
-  - *Implementation*: Renders `h1`-`h6` with optimized inline styles (reduced margins and font sizes) to fit the card layout compact.
-- **Bold/Italic**: Fixed regex to support:
-  - Chinese characters and punctuation (e.g., `**测试**`).
-  - Mixed content including code blocks within bold tags.
-  - Non-greedy matching to prevent over-selection.
+### 2.2 功能增强
+- **列表**：增加了对无序列表的支持（`- item`、`* item`）。
+  - *实现*：逐行检测列表标记，并将内容包裹在 `<ul><li>...</li></ul>` 中，带有内联样式（`margin: 0; padding-left: 20px`）以确保卡片中的缩进正确。
+- **标题**：增加了对标题的支持（`#` 到 `######`）。
+  - *实现*：渲染 `h1`-`h6`，并优化了内联样式（减少边距和字体大小），以适应紧凑的卡片布局。
+- **粗体/斜体**：修复了正则以支持：
+  - 中文字符和标点符号（例如 `**测试**`）。
+  - 包含代码块的混合内容。
+  - 非贪婪匹配，防止过度选择。
 
-### 2.3 Layout Optimization
-- **Whitespace Control**:
-  - Filtered out empty lines to remove excessive vertical gaps.
-  - Replaced `<br>` joins with `<div>` wrappers (`margin-bottom: 4px`) for precise spacing control.
-- **Compact Typography**:
-  - Adjusted heading line heights and margins to be more dense.
-  - Optimized list spacing to prevent visual clutter in small card areas.
+### 2.3 布局优化
+- **空白控制**：
+  - 过滤掉空行，去除多余的垂直间距。
+  - 将 `<br>` 连接替换为 `<div>` 包裹（`margin-bottom: 4px`），以实现精确的间距控制。
+- **紧凑排版**：
+  - 调整了标题的行高和边距，使其更加紧凑。
+  - 优化了列表间距，防止在小卡片区域中显得杂乱。
 
-## 3. Verification
-- [x] **Bold with Chinese**: `**“检查器（Checker）”**` renders correctly.
-- [x] **Mixed Content**: Bold text containing code blocks works.
-- [x] **Lists**: Unordered lists render with proper bullets and indentation.
-- [x] **Headings**: `# Title` renders as a styled heading, not plain text.
-- [x] **Spacing**: Card preview no longer has huge gaps between lines.
+## 3. 验证
+- [x] **中文粗体**：`**“检查器（Checker）”**` 渲染正确。
+- [x] **混合内容**：包含代码块的粗体文本正常工作。
+- [x] **列表**：无序列表渲染出正确的圆点和缩进。
+- [x] **标题**：`# 标题` 渲染为带样式的标题，而非纯文本。
+- [x] **间距**：卡片预览中行与行之间不再有巨大的空白。
 
-## 4. Technical Summary
-- **File Modified**: `src/components/IdeaCard.vue`
-- **Key Logic**: `parsedContent` computed property now splits text by newline, processes each line for structure (List/Heading) and inline styles (Bold/Code/Italic), and recombines using structured HTML (`div`, `ul`, `h*`).
+## 4. 技术总结
+- **修改文件**：`src/components/IdeaCard.vue`
+- **核心逻辑**：`parsedContent` 计算属性现在按换行符拆分文本，处理每一行的结构（列表/标题）和行内样式（粗体/代码/斜体），并使用结构化 HTML（`div`、`ul`、`h*`）重新组合。

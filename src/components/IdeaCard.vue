@@ -13,47 +13,47 @@ const emit = defineEmits<{
   (e: 'preview', id: string): void
 }>()
 
-// Simple Markdown Parser (from original logic)
+// 简单的 Markdown 解析器（基于原始逻辑改进）
 const parsedContent = computed(() => {
   const text = props.idea.content.substring(0, 100) + (props.idea.content.length > 100 ? '...' : '')
   
-  // 1. Escape HTML special characters first
+  // 1. 首先转义 HTML 特殊字符
   const escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
-  // 2. Split into lines
+  // 2. 按行拆分
   const lines = escapedText.split('\n')
 
-  // 3. Process each line
+  // 3. 处理每一行
   const processedLines = lines.map(line => {
     let content = line
     let isList = false
     let headingLevel = 0
     
-    // Check for headings
+    // 检查标题
     const headingMatch = content.match(/^(\s*)(#{1,6})\s+(.*)/)
     if (headingMatch) {
       headingLevel = headingMatch[2].length
       content = headingMatch[3]
     } else {
-      // Check for list item (supports - and *)
+      // 检查列表项（支持 - 和 *）
       const listMatch = content.match(/^(\s*)([-*])\s+(.*)/)
       if (listMatch) {
         isList = true
-        content = listMatch[3] // Extract content after list marker
+        content = listMatch[3] // 提取列表标记后的内容
       }
     }
     
-    // Process inline styles
-    // Code blocks
+    // 处理行内样式
+    // 代码块
     content = content.replace(/`([^`]+)`/g, '<code>$1</code>')
     
-    // Bold - supports Chinese characters and symbols
+    // 粗体 - 支持中文字符和符号
     content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     
-    // Italic - avoid matching across * used in bold
+    // 斜体 - 避免匹配跨行的 *（防止与粗体冲突）
     content = content.replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
     
-    // Wrap in tags
+    // 包裹标签
     if (headingLevel > 0) {
       return `<h${headingLevel} style="margin: 0.2em 0 0.1em; font-size: ${1.2 - (headingLevel * 0.05)}em; line-height: 1.2;">${content}</h${headingLevel}>`
     }
@@ -62,13 +62,13 @@ const parsedContent = computed(() => {
       return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`
     }
     
-    // For normal text, if it's empty (just newline), return empty string to avoid double breaks
+    // 对于普通文本，如果是空行（仅换行符），返回空字符串以避免双重换行
     if (!content.trim()) return ''
     
     return `<div style="margin-bottom: 4px;">${content}</div>`
   })
   
-  // 4. Join lines without <br> since we use divs for structure now
+  // 4. 合并所有行，不使用 <br>，因为现在使用 div 进行结构化布局
   return processedLines.filter(line => line !== '').join('')
 })
 

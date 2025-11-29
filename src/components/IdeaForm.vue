@@ -51,7 +51,7 @@ const resetForm = () => {
   }
 }
 
-// Sync with props for edit mode
+// 与 props 同步以进入编辑模式
 watch(() => props.editData, (newVal) => {
   if (newVal) {
     formData.title = newVal.title

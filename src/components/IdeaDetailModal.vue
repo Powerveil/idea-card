@@ -32,7 +32,7 @@ const formattedDate = computed(() => {
 
 watch(() => [props.show, props.idea, internalIsEditing.value], async ([show, idea, isEditing]) => {
   if (show && idea && !isEditing && previewContainer.value) {
-    // Use Vditor's preview rendering
+    // 使用 Vditor 的预览渲染
     await Vditor.preview(previewContainer.value, (idea as Idea).content, {
       mode: 'light',
     })
@@ -61,7 +61,7 @@ const handleFormCancel = () => {
   <div v-if="show && idea" class="modal-overlay" @click="emit('close')">
     <div class="modal-content" @click.stop :style="{ borderTopColor: idea.color !== '#ffffff' ? idea.color : '#eee' }">
       
-      <!-- Edit Mode -->
+      <!-- 编辑模式 -->
       <div v-if="internalIsEditing" class="edit-mode-wrapper">
         <IdeaForm 
           :edit-data="idea" 
@@ -71,7 +71,7 @@ const handleFormCancel = () => {
         />
       </div>
 
-      <!-- Preview Mode -->
+      <!-- 预览模式 -->
       <div v-else class="preview-mode-wrapper">
         <div class="modal-header">
           <div class="modal-title-group">
