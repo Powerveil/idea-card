@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idea Card Manager</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.15);
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --max-width: 1200px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: var(--card-bg);
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Section */
+        .card-form {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-option.selected {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .tags-input-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: white;
+        }
+
+        .tag-chip {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-chip span {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tags-input-container input {
+            border: none;
+            padding: 5px;
+            flex: 1;
+            min-width: 60px;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Card Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            align-content: start;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 5px solid transparent;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-right: 10px;
+            word-break: break-word;
+        }
+
+        .card-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .card-content {
+            flex: 1;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #555;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+        
+        /* Markdown Styles within Card */
+        .card-content h1, .card-content h2, .card-content h3 { font-size: 1rem; margin: 5px 0; }
+        .card-content ul, .card-content ol { padding-left: 20px; }
+        .card-content blockquote { border-left: 3px solid #ddd; padding-left: 10px; color: #777; }
+        .card-content code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .card-tag {
+            background: #eef2f7;
+            color: var(--primary-color);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .action-btn.delete:hover {
+            color: var(--danger);
+        }
+
+        .action-btn.favorite.active {
+            color: var(--warning);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Idea Card Manager</h1>
+        <div class="stats" id="stats">Total: 0</div>
+    </header>
+
+    <section class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索标题或内容...">
+        </div>
+        <div class="filter-group">
+            <select id="colorFilter">
+                <option value="all">所有颜色</option>
+                <!-- Generated by JS -->
+            </select>
+            <select id="tagFilter">
+                <option value="all">所有标签</option>
+                <!-- Generated by JS -->
+            </select>
+        </div>
+    </section>
+
+    <div class="main-layout">
+        <!-- Input Form -->
+        <aside class="card-form">
+            <h2>添加新想法</h2>
+            <form id="ideaForm">
+                <div class="form-group">
+                    <label for="title">标题 *</label>
+                    <input type="text" id="title" class="form-control" maxlength="50" required placeholder="输入标题 (最多50字)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">内容 (支持Markdown)</label>
+                    <textarea id="content" class="form-control" placeholder="输入详细内容..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>标签</label>
+                    <div class="tags-input-container" id="tagsContainer">
+                        <input type="text" id="tagInput" placeholder="输入标签按回车添加">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>颜色标记</label>
+                    <div class="color-picker" id="colorPicker">
+                        <!-- Colors generated by JS -->
+                    </div>
+                    <input type="hidden" id="selectedColor" value="#ffffff">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn">添加卡片</button>
+                    <button type="button" class="btn" id="cancelEditBtn" style="background: var(--text-secondary); display: none;">取消</button>
+                </div>
+            </form>
+        </aside>
+
+        <!-- Card Grid -->
+        <main class="cards-grid" id="cardsGrid">
+            <!-- Cards generated by JS -->
+        </main>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // Constants & Config
+    const COLORS = [
+        { value: '#ffffff', name: 'White' },
+        { value: '#fff3cd', name: 'Yellow' },
+        { value: '#d4edda', name: 'Green' },
+        { value: '#f8d7da', name: 'Red' },
+        { value: '#d1ecf1', name: 'Blue' },
+        { value: '#e2e3e5', name: 'Grey' },
+        { value: '#e8daef', name: 'Purple' }
+    ];
+    
+    const STORAGE_KEY = 'idea-cards-data';
+
+    // State
+    let ideas = [];
+    let currentTags = new Set();
+    let currentFilter = {
+        search: '',
+        color: 'all',
+        tag: 'all'
+    };
+    let formTags = [];
+    let editingId = null; // Track editing state
+
+    // DOM Elements
+    const form = document.getElementById('ideaForm');
+    const formTitle = form.querySelector('h2') || document.querySelector('.card-form h2');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const titleInput = document.getElementById('title');
+    const contentInput = document.getElementById('content');
+    const tagInput = document.getElementById('tagInput');
+    const tagsContainer = document.getElementById('tagsContainer');
+    const colorPicker = document.getElementById('colorPicker');
+    const selectedColorInput = document.getElementById('selectedColor');
+    const cardsGrid = document.getElementById('cardsGrid');
+    const statsEl = document.getElementById('stats');
+    const searchInput = document.getElementById('searchInput');
+    const colorFilter = document.getElementById('colorFilter');
+    const tagFilter = document.getElementById('tagFilter');
+    const toastEl = document.getElementById('toast');
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        loadIdeas();
+        initColorPicker();
+        renderFilterOptions();
+        renderCards();
+        updateStats();
+    });
+
+    // --- Data Management ---
+
+    function loadIdeas() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            ideas = JSON.parse(stored);
+            // Fix date format if old data exists or just ensure sorting
+            ideas.sort((a, b) => b.createdAt - a.createdAt);
+        }
+    }
+
+    function saveIdeas() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+        renderFilterOptions();
+        updateStats();
+    }
+
+    function addIdea(idea) {
+        ideas.unshift(idea);
+        saveIdeas();
+        renderCards();
+        showToast('卡片添加成功！', 'success');
+    }
+
+    function deleteIdea(id) {
+        if (confirm('确定要删除这张卡片吗？此操作无法撤销。')) {
+            ideas = ideas.filter(i => i.id !== id);
+            saveIdeas();
+            renderCards();
+            showToast('卡片已删除', 'success');
+        }
+    }
+
+    function toggleFavorite(id) {
+        const idea = ideas.find(i => i.id === id);
+        if (idea) {
+            idea.isFavorite = !idea.isFavorite;
+            saveIdeas();
+            renderCards(); // Re-render to update UI
+        }
+    }
+
+    // --- UI Rendering ---
+
+    function initColorPicker() {
+        colorPicker.innerHTML = '';
+        COLORS.forEach((color, index) => {
+            const el = document.createElement('div');
+            el.className = `color-option ${index === 0 ? 'selected' : ''}`;
+            el.style.backgroundColor = color.value;
+            el.dataset.value = color.value;
+            el.onclick = () => selectColor(color.value);
+            colorPicker.appendChild(el);
+        });
+        selectColor(COLORS[0].value);
+    }
+
+    function selectColor(color) {
+        selectedColorInput.value = color;
+        document.querySelectorAll('.color-option').forEach(el => {
+            el.classList.toggle('selected', el.dataset.value === color);
+        });
+    }
+
+    function renderFilterOptions() {
+        // Update Color Filter
+        colorFilter.innerHTML = '<option value="all">所有颜色</option>';
+        COLORS.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.value;
+            option.textContent = c.name;
+            option.style.backgroundColor = c.value;
+            if (currentFilter.color === c.value) option.selected = true;
+            colorFilter.appendChild(option);
+        });
+
+        // Update Tag Filter
+        const allTags = new Set();
+        ideas.forEach(idea => idea.tags.forEach(tag => allTags.add(tag)));
+        
+        tagFilter.innerHTML = '<option value="all">所有标签</option>';
+        Array.from(allTags).sort().forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag;
+            option.textContent = tag;
+            if (currentFilter.tag === tag) option.selected = true;
+            tagFilter.appendChild(option);
+        });
+    }
+
+    function renderCards() {
+        cardsGrid.innerHTML = '';
+        
+        const filtered = ideas.filter(idea => {
+            const matchSearch = (idea.title + idea.content).toLowerCase().includes(currentFilter.search.toLowerCase());
+            const matchColor = currentFilter.color === 'all' || idea.color === currentFilter.color;
+            const matchTag = currentFilter.tag === 'all' || idea.tags.includes(currentFilter.tag);
+            return matchSearch && matchColor && matchTag;
+        });
+
+        if (filtered.length === 0) {
+            cardsGrid.innerHTML = '<div class="empty-state">没有找到符合条件的卡片</div>';
+            return;
+        }
+
+        filtered.forEach(idea => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.borderTopColor = idea.color !== '#ffffff' ? idea.color : '#eee';
+            
+            // Simple Markdown Parsing
+            const parsedContent = parseMarkdown(idea.content.substring(0, 100) + (idea.content.length > 100 ? '...' : ''));
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${escapeHtml(idea.title)}</div>
+                    <div class="card-date">${formatDate(idea.createdAt)}</div>
+                </div>
+                <div class="card-content">${parsedContent}</div>
+                <div class="card-tags">
+                    ${idea.tags.map(tag => `<span class="card-tag">#${escapeHtml(tag)}</span>`).join('')}
+                </div>
+                <div class="card-actions">
+                    <button class="action-btn edit" onclick="editIdea('${idea.id}')" title="编辑">✏️</button>
+                    <button class="action-btn favorite ${idea.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${idea.id}')" title="收藏">
+                        ${idea.isFavorite ? '★' : '☆'}
+                    </button>
+                    <button class="action-btn delete" onclick="deleteIdea('${idea.id}')" title="删除">🗑️</button>
+                </div>
+            `;
+            cardsGrid.appendChild(card);
+        });
+    }
+
+    function updateStats() {
+        const total = ideas.length;
+        const favs = ideas.filter(i => i.isFavorite).length;
+        statsEl.textContent = `总计: ${total} | 收藏: ${favs}`;
+    }
+
+    // --- Helpers ---
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function parseMarkdown(text) {
+        // Basic parser: prevent XSS by escaping first, then apply formatting
+        let html = escapeHtml(text);
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+        html = html.replace(/\n/g, '<br>'); // Line breaks
+        return html;
+    }
+
+    function showToast(message, type = 'success') {
+        toastEl.textContent = message;
+        toastEl.className = `toast ${type} show`;
+        setTimeout(() => {
+            toastEl.classList.remove('show');
+        }, 3000);
+    }
+
+    // --- Event Listeners ---
+
+    // Form: Tag Input
+    tagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const tag = tagInput.value.trim();
+            if (tag && !formTags.includes(tag)) {
+                addFormTag(tag);
+            }
+            tagInput.value = '';
+        }
+    });
+
+    function addFormTag(tag) {
+        formTags.push(tag);
+        renderFormTags();
+    }
+
+    function removeFormTag(tag) {
+        formTags = formTags.filter(t => t !== tag);
+        renderFormTags();
+    }
+
+    function renderFormTags() {
+        // Clear existing chips but keep input
+        const chips = tagsContainer.querySelectorAll('.tag-chip');
+        chips.forEach(chip => chip.remove());
+        
+        formTags.forEach(tag => {
+            const chip = document.createElement('div');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `${escapeHtml(tag)} <span onclick="removeFormTag('${escapeHtml(tag)}')">×</span>`;
+            tagsContainer.insertBefore(chip, tagInput);
+        });
+    }
+
+    // Form: Submit
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const ideaData = {
+            title: titleInput.value.trim(),
+            content: contentInput.value.trim(),
+            tags: [...formTags],
+            color: selectedColorInput.value
+        };
+
+        if (editingId) {
+            updateIdea(editingId, ideaData);
+        } else {
+            const newIdea = {
+                id: Date.now().toString(),
+                ...ideaData,
+                createdAt: Date.now(),
+                isFavorite: false
+            };
+            addIdea(newIdea);
+        }
+        
+        // Reset Form
+        cancelEdit();
+    });
+    
+    cancelEditBtn.addEventListener('click', cancelEdit);
+
+    function editIdea(id) {
+        const idea = ideas.find(i => i.id === id);
+        if (!idea) return;
+
+        editingId = id;
+        titleInput.value = idea.title;
+        contentInput.value = idea.content;
+        formTags = [...idea.tags];
+        selectColor(idea.color);
+        renderFormTags();
+
+        formTitle.textContent = '编辑想法';
+        submitBtn.textContent = '更新卡片';
+        cancelEditBtn.style.display = 'block';
+        
+        // Scroll to form on mobile
+        if (window.innerWidth < 900) {
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        form.reset();
+        formTags = [];
+        renderFormTags();
+        selectColor(COLORS[0].value);
+        
+        formTitle.textContent = '添加新想法';
+        submitBtn.textContent = '添加卡片';
+        cancelEditBtn.style.display = 'none';
+    }
+
+    function updateIdea(id, data) {
+        const index = ideas.findIndex(i => i.id === id);
+        if (index !== -1) {
+            ideas[index] = { ...ideas[index], ...data, updatedAt: Date.now() };
+            saveIdeas();
+            renderCards();
+            showToast('卡片已更新', 'success');
+        }
+    }
+
+    // Filters
+    searchInput.addEventListener('input', (e) => {
+        currentFilter.search = e.target.value;
+        renderCards();
+    });
+
+    colorFilter.addEventListener('change', (e) => {
+        currentFilter.color = e.target.value;
+        renderCards();
+    });
+
+    tagFilter.addEventListener('change', (e) => {
+        currentFilter.tag = e.target.value;
+        renderCards();
+    });
+
+    // Global expose for inline onclicks
+    window.removeFormTag = removeFormTag;
+    window.deleteIdea = deleteIdea;
+    window.toggleFavorite = toggleFavorite;
+    window.editIdea = editIdea;
+
+</script>
+</body>
+</html>
