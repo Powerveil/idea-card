@@ -1,9 +1,9 @@
-# TODO: Idea Card Manager
+# 待办事项：灵感卡片管理器 (Idea Card Manager)
 
-## Pending Items
-- [ ] **Dark Mode**: Add toggle to switch CSS variables.
-- [ ] **Data Export**: Allow user to download ideas as JSON backup.
-- [ ] **Drag & Drop**: Implement drag and drop to reorder cards manually.
+## 待处理项目
+- [ ] **深色模式**：添加切换开关以切换 CSS 变量。
+- [ ] **数据导出**：允许用户将灵感下载为 JSON 备份。
+- [ ] **拖放**：实现拖放以手动重新排序卡片。
 
-## Configuration
-- No configuration needed. Works out of the box in `index.html`.
+## 配置
+- 无需配置。在 `index.html` 中开箱即用。

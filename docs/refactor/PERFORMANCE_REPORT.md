@@ -1,27 +1,27 @@
-# PERFORMANCE REPORT: Idea Card Manager Refactor
+# 性能报告：灵感卡片管理器重构
 
-## 1. Comparison
-| Metric | Legacy (Single HTML) | Refactored (Vue 3 + Vite) |
+## 1. 对比
+| 指标 | 旧版 (单 HTML) | 重构版 (Vue 3 + Vite) |
 | :--- | :--- | :--- |
-| **Maintainability** | Low (Monolithic) | High (Component-based) |
-| **Bundle Size** | ~15KB (Raw Code) | ~45KB (Gzipped Vendor + Code) |
-| **First Contentful Paint** | ~0.3s | ~0.8s (App Shell) |
-| **Interactive** | Immediate | < 1.0s |
-| **SEO** | Poor (Dynamic content) | Better (Semantic HTML structure) |
+| **可维护性** | 低 (单体) | 高 (组件化) |
+| **包体积** | ~15KB (原始代码) | ~45KB (Gzip 压缩后的 Vendor + 代码) |
+| **首次内容绘制 (FCP)** | ~0.3s | ~0.8s (App Shell) |
+| **可交互时间** | 立即 | < 1.0s |
+| **SEO** | 差 (动态内容) | 更好 (语义化 HTML 结构) |
 
-## 2. Optimization Achievements
-- **Tree Shaking**: Enabled via Vite (Rollup). Unused Vue features are dropped.
-- **Code Splitting**: Vendor chunk separated from App code.
-- **Compression**: Gzip enabled for production build (`.gz` files generated).
-- **PWA**: Service Worker registered for offline caching.
+## 2. 优化成果
+- **Tree Shaking**: 通过 Vite (Rollup) 启用。未使用的 Vue 功能被丢弃。
+- **代码分割**: 第三方库 (Vendor) 与应用代码分离。
+- **压缩**: 生产构建启用了 Gzip (生成 `.gz` 文件)。
+- **PWA**: 注册 Service Worker 以进行离线缓存。
 
-## 3. Lighthouse Projection
-- **Performance**: 95+ (Due to minimal blocking JS and optimized CSS).
-- **Accessibility**: 100 (Semantic HTML, ARIA labels on buttons).
-- **Best Practices**: 100 (Modern HTTPS, standard meta tags).
-- **SEO**: 90 (Basic meta tags included).
+## 3. Lighthouse 预测
+- **性能**: 95+ (得益于最小化阻塞 JS 和优化 CSS)。
+- **无障碍性**: 100 (语义化 HTML, 按钮上的 ARIA 标签)。
+- **最佳实践**: 100 (现代 HTTPS, 标准 meta 标签)。
+- **SEO**: 90 (包含基本 meta 标签)。
 
-## 4. Monitoring Strategy
-- **Tool**: `web-vitals` library.
-- **Metrics**: CLS, FID, LCP.
-- **Implementation**: Hooks in `main.ts` log to console (PROD) or can be sent to analytics endpoint.
+## 4. 监控策略
+- **工具**: `web-vitals` 库。
+- **指标**: CLS, FID, LCP。
+- **实现**: `main.ts` 中的钩子将日志输出到控制台 (PROD) 或发送到分析端点。

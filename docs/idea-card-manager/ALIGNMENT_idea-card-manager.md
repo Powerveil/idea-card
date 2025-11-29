@@ -1,32 +1,32 @@
-# ALIGNMENT: Idea Card Manager
+# 对齐文档：灵感卡片管理器 (Idea Card Manager)
 
-## 1. Project Context
-- **Goal**: Create a single HTML page for managing idea cards.
-- **Tech Stack**: Pure HTML, CSS, JavaScript. No external libraries (jQuery, Bootstrap, etc.).
-- **Environment**: Browser-based, LocalStorage for persistence.
+## 1. 项目背景
+- **目标**：创建一个用于管理灵感卡片的单页 HTML 页面。
+- **技术栈**：纯 HTML, CSS, JavaScript。无外部库（jQuery, Bootstrap 等）。
+- **环境**：基于浏览器，使用 LocalStorage 进行持久化。
 
-## 2. Requirements Understanding
-- **Core Functionality**:
-    - **Create**: Form with Title (max 50), Content (Markdown support), Tags, Color.
-    - **Read**: Responsive grid layout. Display Title, Summary, Date. Hover effects.
-    - **Update**: Edit functionality (implied by "Card Operations").
-    - **Delete**: Delete with confirmation.
-    - **Favorite**: Mark cards as favorite.
-- **Interactions**:
-    - Real-time stats (Total count).
-    - Filter by Tag and Color.
-    - Search by Title/Content.
-    - Form validation and auto-clear.
-- **UI/UX**:
-    - Max width 1200px.
-    - Clean, modern, responsive.
-    - Visual hierarchy.
+## 2. 需求理解
+- **核心功能**：
+    - **创建**：包含标题（最多50字）、内容（支持 Markdown）、标签、颜色的表单。
+    - **读取**：响应式网格布局。显示标题、摘要、日期。悬停效果。
+    - **更新**：编辑功能（由“卡片操作”暗示）。
+    - **删除**：带确认的删除。
+    - **收藏**：将卡片标记为收藏。
+- **交互**：
+    - 实时统计（总数）。
+    - 按标签和颜色过滤。
+    - 按标题/内容搜索。
+    - 表单验证和自动清除。
+- **UI/UX**：
+    - 最大宽度 1200px。
+    - 干净、现代、响应式。
+    - 视觉层次结构。
 
-## 3. Consensus & Boundaries
-- **Single File**: The output will be a single `index.html` containing HTML, CSS, and JS for portability and simplicity as requested.
-- **Markdown**: Since no external libs are allowed, a simple custom Markdown parser (or just text formatting) will be implemented. It will support basic syntax like `# Header`, `**bold**`, `- list`.
-- **Storage**: `localStorage` using a key like `idea-cards-data`.
+## 3. 共识与边界
+- **单文件**：根据要求，输出将是一个包含 HTML、CSS 和 JS 的单一 `index.html` 文件，以便于移植和简化。
+- **Markdown**：由于不允许使用外部库，将实现一个简单的自定义 Markdown 解析器（或仅文本格式化）。它将支持基本语法，如 `# 标题`、`**粗体**`、`- 列表`。
+- **存储**：使用 `localStorage`，键名为 `idea-cards-data`。
 
-## 4. Questions & Clarifications
-- *Resolved*: "Single HTML page" interpreted as one file with embedded resources.
-- *Resolved*: "Markdown" interpreted as basic custom parsing.
+## 4. 问题与澄清
+- *已解决*：“单 HTML 页面”解释为一个包含嵌入资源的文件。
+- *已解决*：“Markdown”解释为基本的自定义解析。

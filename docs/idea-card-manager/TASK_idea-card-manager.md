@@ -1,21 +1,21 @@
-# TASK: Idea Card Manager
+# 任务：灵感卡片管理器 (Idea Card Manager)
 
-## Phase 1: Foundation
-1. **HTML Skeleton**: Create `index.html` with semantic structure.
-2. **CSS Reset & Variables**: Define colors, fonts, and basic layout.
-3. **Form UI**: Implement the input form with validation styling.
+## 阶段 1：基础
+1. **HTML 骨架**：创建具有语义结构的 `index.html`。
+2. **CSS 重置与变量**：定义颜色、字体和基本布局。
+3. **表单 UI**：实现带有验证样式的输入表单。
 
-## Phase 2: Core Logic
-4. **Data Layer**: Implement `Storage` class/functions for `localStorage`.
-5. **Add Card**: Handle form submission, create object, save, and update UI.
-6. **Render List**: Implement `renderCards()` to display cards in a grid.
+## 阶段 2：核心逻辑
+4. **数据层**：实现用于 `localStorage` 的 `Storage` 类/函数。
+5. **添加卡片**：处理表单提交，创建对象，保存并更新 UI。
+6. **渲染列表**：实现 `renderCards()` 以在网格中显示卡片。
 
-## Phase 3: Interactions
-7. **Card Actions**: Implement Delete (with confirm), Favorite toggle.
-8. **Markdown Renderer**: Simple function to parse basic MD to HTML.
-9. **Filtering & Search**: Implement filter logic in `renderCards()`.
+## 阶段 3：交互
+7. **卡片操作**：实现删除（带确认）、收藏切换。
+8. **Markdown 渲染器**：将基本 MD 解析为 HTML 的简单函数。
+9. **过滤与搜索**：在 `renderCards()` 中实现过滤逻辑。
 
-## Phase 4: Polish
-10. **Responsiveness**: Adjust grid and form for mobile.
-11. **Animations**: Add hover effects and simple entry animations.
-12. **Final Review**: Check all requirements against ALIGNMENT.
+## 阶段 4：完善
+10. **响应式**：调整移动端的网格和表单。
+11. **动画**：添加悬停效果和简单的进入动画。
+12. **最终审查**：根据对齐文档 (ALIGNMENT) 检查所有需求。

@@ -1,21 +1,21 @@
-# ACCEPTANCE: Idea Card Manager
+# 验收报告：灵感卡片管理器 (Idea Card Manager)
 
-## 1. Feature Verification
-- [x] **Create Card**: Form allows adding title, content, tags, and color.
-- [x] **List Cards**: Cards display in a responsive grid.
-- [x] **Data Persistence**: Data survives page reload (localStorage).
-- [x] **Delete**: Confirmation dialog appears, card is removed.
-- [x] **Edit**: "Edit" button populates form, allows update, and "Cancel" resets form.
-- [x] **Search**: Filtering by title/content works.
-- [x] **Filter**: Filtering by color and tags works.
-- [x] **Stats**: Real-time counter updates.
+## 1. 功能验证
+- [x] **创建卡片**：表单允许添加标题、内容、标签和颜色。
+- [x] **卡片列表**：卡片以响应式网格显示。
+- [x] **数据持久化**：刷新页面后数据保留 (localStorage)。
+- [x] **删除**：出现确认对话框，卡片被移除。
+- [x] **编辑**：“编辑”按钮填充表单，允许更新，“取消”重置表单。
+- [x] **搜索**：按标题/内容过滤有效。
+- [x] **过滤**：按颜色和标签过滤有效。
+- [x] **统计**：实时计数器更新。
 
-## 2. Quality Checks
-- [x] **Responsiveness**: Grid adapts to screen width (1 col -> 2/3 cols).
-- [x] **No Dependencies**: Pure HTML/CSS/JS.
-- [x] **Single File**: All code in `index.html`.
-- [x] **Code Style**: Clean, semantic HTML, modular JS.
+## 2. 质量检查
+- [x] **响应式**：网格适应屏幕宽度（1列 -> 2/3列）。
+- [x] **无依赖**：纯 HTML/CSS/JS。
+- [x] **单文件**：所有代码在 `index.html` 中。
+- [x] **代码风格**：干净、语义化的 HTML，模块化的 JS。
 
-## 3. Improvements
-- Added Edit functionality which was initially missed.
-- Basic Markdown parsing implemented (Bold, Italic, Line breaks).
+## 3. 改进
+- 添加了最初遗漏的编辑功能。
+- 实现了基本的 Markdown 解析（粗体、斜体、换行）。
