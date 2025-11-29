@@ -16,11 +16,60 @@ const emit = defineEmits<{
 // Simple Markdown Parser (from original logic)
 const parsedContent = computed(() => {
   const text = props.idea.content.substring(0, 100) + (props.idea.content.length > 100 ? '...' : '')
-  let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
-  html = html.replace(/\n/g, '<br>')
-  return html
+  
+  // 1. Escape HTML special characters first
+  const escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+
+  // 2. Split into lines
+  const lines = escapedText.split('\n')
+
+  // 3. Process each line
+  const processedLines = lines.map(line => {
+    let content = line
+    let isList = false
+    let headingLevel = 0
+    
+    // Check for headings
+    const headingMatch = content.match(/^(\s*)(#{1,6})\s+(.*)/)
+    if (headingMatch) {
+      headingLevel = headingMatch[2].length
+      content = headingMatch[3]
+    } else {
+      // Check for list item (supports - and *)
+      const listMatch = content.match(/^(\s*)([-*])\s+(.*)/)
+      if (listMatch) {
+        isList = true
+        content = listMatch[3] // Extract content after list marker
+      }
+    }
+    
+    // Process inline styles
+    // Code blocks
+    content = content.replace(/`([^`]+)`/g, '<code>$1</code>')
+    
+    // Bold - supports Chinese characters and symbols
+    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    
+    // Italic - avoid matching across * used in bold
+    content = content.replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+    
+    // Wrap in tags
+    if (headingLevel > 0) {
+      return `<h${headingLevel} style="margin: 0.2em 0 0.1em; font-size: ${1.2 - (headingLevel * 0.05)}em; line-height: 1.2;">${content}</h${headingLevel}>`
+    }
+
+    if (isList) {
+      return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`
+    }
+    
+    // For normal text, if it's empty (just newline), return empty string to avoid double breaks
+    if (!content.trim()) return ''
+    
+    return `<div style="margin-bottom: 4px;">${content}</div>`
+  })
+  
+  // 4. Join lines without <br> since we use divs for structure now
+  return processedLines.filter(line => line !== '').join('')
 })
 
 const formattedDate = computed(() => {

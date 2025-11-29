@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
+import Vditor from 'vditor'
+import 'vditor/dist/index.css'
 
 const COLORS = [
   { value: '#ffffff', name: '白色' },
@@ -19,6 +21,7 @@ const props = defineProps<{
     tags: string[]
     color: string
   } | null
+  variant?: 'sidebar' | 'modal'
 }>()
 
 const emit = defineEmits<{
@@ -34,6 +37,8 @@ const formData = reactive({
 })
 
 const tagInput = ref('')
+const vditor = ref<Vditor | null>(null)
+const vditorId = `vditor-${Math.random().toString(36).substr(2, 9)}`
 
 const resetForm = () => {
   formData.title = ''
@@ -41,6 +46,9 @@ const resetForm = () => {
   formData.tags = []
   formData.color = COLORS[0].value
   tagInput.value = ''
+  if (vditor.value) {
+    vditor.value.setValue('')
+  }
 }
 
 // Sync with props for edit mode
@@ -50,6 +58,9 @@ watch(() => props.editData, (newVal) => {
     formData.content = newVal.content
     formData.tags = [...newVal.tags]
     formData.color = newVal.color
+    if (vditor.value) {
+      vditor.value.setValue(newVal.content)
+    }
   } else {
     resetForm()
   }
@@ -68,15 +79,38 @@ const removeTag = (tag: string) => {
 }
 
 const handleSubmit = () => {
+  if (vditor.value) {
+    formData.content = vditor.value.getValue()
+  }
   emit('submit', { ...formData })
   if (!props.editData) {
     resetForm()
   }
 }
+
+onMounted(() => {
+  vditor.value = new Vditor(vditorId, {
+    height: 360,
+    toolbarConfig: {
+      pin: true,
+    },
+    cache: {
+      enable: false,
+    },
+    after: () => {
+      if (props.editData) {
+        vditor.value?.setValue(props.editData.content)
+      }
+    },
+    input: (value) => {
+      formData.content = value
+    }
+  })
+})
 </script>
 
 <template>
-  <aside class="card-form">
+  <aside class="card-form" :class="{ 'modal-variant': variant === 'modal' }">
     <h2>{{ editData ? '编辑想法' : '添加新想法' }}</h2>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
@@ -93,14 +127,8 @@ const handleSubmit = () => {
       </div>
       
       <div class="form-group">
-        <label for="content">内容 (支持Markdown)</label>
-        <textarea 
-          id="content" 
-          v-model="formData.content" 
-          class="form-control" 
-          placeholder="输入详细内容..." 
-          required
-        ></textarea>
+        <label for="content">内容 (Markdown)</label>
+        <div :id="vditorId"></div>
       </div>
 
       <div class="form-group">
@@ -158,6 +186,13 @@ const handleSubmit = () => {
   top: 20px;
 }
 
+.card-form.modal-variant {
+  position: static;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -181,11 +216,6 @@ const handleSubmit = () => {
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-}
-
-textarea.form-control {
-  min-height: 120px;
-  resize: vertical;
 }
 
 .color-picker {

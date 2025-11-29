@@ -9,7 +9,10 @@ Successfully implemented a single-page Idea Card Manager using pure HTML, CSS, a
 - **Interactions**:
     - Real-time search and filtering.
     - Toast notifications for actions.
-    - Markdown rendering (Bold, Italic, Breaks).
+    - Enhanced Markdown rendering:
+        - Robust Bold/Italic support (including Chinese/Symbols).
+        - Unordered Lists and Headings (#-######).
+        - Code blocks.
     - Edit/Delete/Favorite actions.
 - **Architecture**: Single `index.html` file containing:
     - CSS with variables for theming.

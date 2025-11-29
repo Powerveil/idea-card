@@ -5,49 +5,43 @@ import { storeToRefs } from 'pinia'
 import IdeaForm from '../components/IdeaForm.vue'
 import IdeaCard from '../components/IdeaCard.vue'
 import FilterBar from '../components/FilterBar.vue'
-import IdeaPreviewModal from '../components/IdeaPreviewModal.vue'
+import IdeaDetailModal from '../components/IdeaDetailModal.vue'
 
 const store = useIdeaStore()
 const { filteredIdeas, stats } = storeToRefs(store)
 
-const editingId = ref<string | null>(null)
-const editData = ref<any>(null)
-const showPreview = ref(false)
-const previewData = ref<any>(null)
+const showDetail = ref(false)
+const detailData = ref<any>(null)
+const isEditingDetail = ref(false)
 
 const handleEdit = (id: string) => {
   const idea = store.ideas.find(i => i.id === id)
   if (idea) {
-    editData.value = idea
-    editingId.value = id
-    // Scroll to top on mobile
-    if (window.innerWidth < 900) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    detailData.value = idea
+    isEditingDetail.value = true
+    showDetail.value = true
   }
 }
 
 const handlePreview = (id: string) => {
   const idea = store.ideas.find(i => i.id === id)
   if (idea) {
-    previewData.value = idea
-    showPreview.value = true
+    detailData.value = idea
+    isEditingDetail.value = false
+    showDetail.value = true
   }
 }
 
 const handleFormSubmit = (data: any) => {
-  if (editingId.value) {
-    store.updateIdea(editingId.value, data)
-    editingId.value = null
-    editData.value = null
-  } else {
-    store.addIdea(data)
-  }
+  store.addIdea(data)
 }
 
-const handleCancelEdit = () => {
-  editingId.value = null
-  editData.value = null
+const handleUpdate = (data: any) => {
+  if (detailData.value) {
+    store.updateIdea(detailData.value.id, data)
+    // Update local detail data to reflect changes immediately
+    detailData.value = { ...detailData.value, ...data }
+  }
 }
 </script>
 
@@ -62,9 +56,7 @@ const handleCancelEdit = () => {
 
     <div class="main-layout">
       <IdeaForm 
-        :edit-data="editData" 
         @submit="handleFormSubmit" 
-        @cancel="handleCancelEdit"
       />
 
       <main class="cards-grid">
@@ -83,10 +75,12 @@ const handleCancelEdit = () => {
       </main>
     </div>
     
-    <IdeaPreviewModal 
-      :show="showPreview" 
-      :idea="previewData" 
-      @close="showPreview = false" 
+    <IdeaDetailModal 
+      :show="showDetail" 
+      :idea="detailData"
+      :is-editing="isEditingDetail" 
+      @close="showDetail = false" 
+      @update="handleUpdate"
     />
   </div>
 </template>
