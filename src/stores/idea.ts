@@ -26,21 +26,56 @@ export const useIdeaStore = defineStore('idea', () => {
     tag: 'all'
   })
 
-  // Load from local storage
-  const loadIdeas = () => {
-    const stored = localStorage.getItem('idea-cards-data')
-    if (stored) {
-      try {
-        ideas.value = JSON.parse(stored)
-      } catch (e) {
-        console.error('Failed to parse ideas', e)
+  // Load from local storage AND server
+  const loadIdeas = async () => {
+    let loadedFromServer = false
+    
+    // Try loading from server first (source of truth for persistence across restarts)
+    try {
+      const res = await fetch('/api/data')
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data) && data.length > 0) {
+          ideas.value = data
+          loadedFromServer = true
+          console.log('已从本地文件加载数据')
+        }
+      }
+    } catch (e) {
+      // Ignore network errors, fallback to local storage
+    }
+
+    // Fallback to local storage if server didn't provide data
+    if (!loadedFromServer) {
+      const stored = localStorage.getItem('idea-cards-data')
+      if (stored) {
+        try {
+          ideas.value = JSON.parse(stored)
+        } catch (e) {
+          console.error('Failed to parse ideas', e)
+        }
       }
     }
   }
 
-  // Save to local storage
-  watch(ideas, (newVal) => {
+  // Save to local storage AND server
+  watch(ideas, async (newVal) => {
+    // 1. Local Storage
     localStorage.setItem('idea-cards-data', JSON.stringify(newVal))
+    
+    // 2. Server Persistence (Local File)
+    try {
+      await fetch('/api/data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newVal)
+      })
+    } catch (e) {
+      // Silent fail for server sync (might be offline or prod build)
+      // console.warn('Failed to sync with server persistence')
+    }
   }, { deep: true })
 
   const addIdea = (idea: Omit<Idea, 'id' | 'createdAt' | 'isFavorite'>) => {
@@ -107,38 +142,20 @@ export const useIdeaStore = defineStore('idea', () => {
     URL.revokeObjectURL(url)
   }
 
-  const importData = async (file: File): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          const json = e.target?.result as string
-          const data = JSON.parse(json)
-          if (Array.isArray(data)) {
-            // Validate basic structure of the first item (optional but good practice)
-            // Replacing current data with imported data
-            if (confirm(`确定要导入 ${data.length} 条卡片吗？这将覆盖当前数据！`)) {
-              ideas.value = data
-              resolve(true)
-            } else {
-              resolve(false)
-            }
-          } else {
-            alert('无效的文件格式：应为卡片数组。')
-            resolve(false)
-          }
-        } catch (error) {
-          console.error('Import failed', error)
-          alert('导入失败：无法解析 JSON 文件。')
-          resolve(false)
-        }
-      }
-      reader.onerror = () => {
-        alert('读取文件失败。')
-        resolve(false)
-      }
-      reader.readAsText(file)
-    })
+  const importData = async (selectedItems: Idea[]) => {
+    if (selectedItems.length > 0) {
+      // Generate new IDs for imported items to avoid ID conflicts
+      const newItemsWithIds = selectedItems.map(item => ({
+        ...item,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        createdAt: item.createdAt || Date.now() // Keep original date if exists, else use now
+      }))
+      
+      // Append new items instead of replacing
+      ideas.value = [...newItemsWithIds, ...ideas.value]
+      return true
+    }
+    return false
   }
 
   // Initialize

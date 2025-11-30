@@ -6,13 +6,20 @@ import IdeaForm from '../components/IdeaForm.vue'
 import IdeaCard from '../components/IdeaCard.vue'
 import FilterBar from '../components/FilterBar.vue'
 import IdeaDetailModal from '../components/IdeaDetailModal.vue'
+import ImportModal from '../components/ImportModal.vue'
+import type { Idea } from '../stores/idea'
 
 const store = useIdeaStore()
-const { filteredIdeas, stats } = storeToRefs(store)
+const { filteredIdeas, stats, ideas } = storeToRefs(store)
 
 const showDetail = ref(false)
 const detailData = ref<any>(null)
 const isEditingDetail = ref(false)
+
+// Import state
+const showImportModal = ref(false)
+const importCandidates = ref<Idea[]>([])
+const existingTitles = ref<Set<string>>(new Set())
 
 const handleEdit = (id: string) => {
   const idea = store.ideas.find(i => i.id === id)
@@ -32,9 +39,16 @@ const handlePreview = (id: string) => {
   }
 }
 
+const handleDelete = (id: string) => {
+  if (confirm('确定要删除这张卡片吗？此操作无法撤销。')) {
+    store.deleteIdea(id)
+  }
+}
+
 const handleFormSubmit = (data: any) => {
   store.addIdea(data)
 }
+
 
 const handleUpdate = (data: any) => {
   if (detailData.value) {
@@ -50,15 +64,51 @@ const triggerImport = () => {
   fileInput.value?.click()
 }
 
-const handleImport = async (event: Event) => {
+const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files.length > 0) {
-    const success = await store.importData(input.files[0])
-    if (success) {
-      // Reset input value to allow re-importing same file if needed
-      input.value = ''
-      alert('导入成功！')
+    const file = input.files[0]
+    const reader = new FileReader()
+    
+    reader.onload = (e) => {
+      try {
+        const json = e.target?.result as string
+        const data = JSON.parse(json)
+        
+        if (Array.isArray(data)) {
+          const validItems = data.filter((item: any) => 
+            item && typeof item === 'object' && item.title && item.content
+          ) as Idea[]
+          
+          if (validItems.length === 0) {
+            alert('文件未包含有效的卡片数据')
+            return
+          }
+
+          importCandidates.value = validItems
+          existingTitles.value = new Set(store.ideas.map(i => i.title))
+          showImportModal.value = true
+          
+          // Reset input so same file can be selected again
+          input.value = ''
+        } else {
+          alert('无效的文件格式：应为 JSON 数组')
+        }
+      } catch (error) {
+        console.error('Parse error:', error)
+        alert('无法解析 JSON 文件')
+      }
     }
+    
+    reader.readAsText(file)
+  }
+}
+
+const handleImportConfirm = async (selectedItems: Idea[]) => {
+  const success = await store.importData(selectedItems)
+  if (success) {
+    showImportModal.value = false
+    alert(`成功导入 ${selectedItems.length} 条卡片！`)
   }
 }
 </script>
@@ -81,7 +131,7 @@ const handleImport = async (event: Event) => {
             type="file" 
             accept=".json" 
             style="display: none" 
-            @change="handleImport"
+            @change="handleFileSelect"
           >
         </div>
       </div>
@@ -102,7 +152,7 @@ const handleImport = async (event: Event) => {
           v-for="idea in filteredIdeas" 
           :key="idea.id" 
           :idea="idea"
-          @delete="store.deleteIdea"
+          @delete="handleDelete"
           @favorite="store.toggleFavorite"
           @edit="handleEdit"
           @preview="handlePreview"
@@ -116,6 +166,14 @@ const handleImport = async (event: Event) => {
       :is-editing="isEditingDetail" 
       @close="showDetail = false" 
       @update="handleUpdate"
+    />
+
+    <ImportModal
+      :show="showImportModal"
+      :import-data="importCandidates"
+      :existing-titles="existingTitles"
+      @close="showImportModal = false"
+      @confirm="handleImportConfirm"
     />
   </div>
 </template>

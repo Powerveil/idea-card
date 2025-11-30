@@ -90,6 +90,16 @@ const handleFormCancel = () => {
           <div class="tags">
             <span v-for="tag in idea.tags" :key="tag" class="tag-chip">#{{ tag }}</span>
           </div>
+          <div class="modal-actions">
+            <button 
+              class="action-btn favorite" 
+              :class="{ active: idea.isFavorite }" 
+              @click="emit('update', { ...idea, isFavorite: !idea.isFavorite })"
+              title="收藏"
+            >
+              {{ idea.isFavorite ? '★' : '☆' }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -98,6 +108,21 @@ const handleFormCancel = () => {
 </template>
 
 <style scoped>
+/* ... existing styles ... */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+/* ... */
 .modal-overlay {
   position: fixed;
   top: 0;

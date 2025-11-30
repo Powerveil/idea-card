@@ -2,10 +2,61 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import viteCompression from 'vite-plugin-compression'
+import fs from 'node:fs'
+import path from 'node:path'
 
 export default defineConfig({
   plugins: [
     vue(),
+    {
+      name: 'simple-db-middleware',
+      configureServer(server) {
+        server.middlewares.use('/api/data', (req, res, next) => {
+          const dataPath = path.resolve(process.cwd(), 'data.json')
+          
+          if (req.method === 'GET') {
+            try {
+              if (fs.existsSync(dataPath)) {
+                const content = fs.readFileSync(dataPath, 'utf-8')
+                res.setHeader('Content-Type', 'application/json')
+                res.end(content || '[]')
+              } else {
+                res.setHeader('Content-Type', 'application/json')
+                res.end('[]')
+              }
+            } catch (e) {
+              console.error('Error reading data.json', e)
+              res.statusCode = 500
+              res.end('[]')
+            }
+            return
+          }
+          
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', chunk => {
+              body += chunk.toString()
+            })
+            req.on('end', () => {
+              try {
+                // Basic validation
+                JSON.parse(body)
+                fs.writeFileSync(dataPath, body)
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ success: true }))
+              } catch (e) {
+                console.error('Error writing data.json', e)
+                res.statusCode = 500
+                res.end(JSON.stringify({ error: 'Failed to save data' }))
+              }
+            })
+            return
+          }
+          
+          next()
+        })
+      }
+    },
     viteCompression({
       algorithm: 'gzip',
       ext: '.gz',
