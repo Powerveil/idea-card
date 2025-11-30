@@ -92,18 +92,69 @@ export const useIdeaStore = defineStore('idea', () => {
     favorites: ideas.value.filter(i => i.isFavorite).length
   }))
 
+  // Export/Import Actions
+  const exportData = () => {
+    const dataStr = JSON.stringify(ideas.value, null, 2)
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    const date = new Date().toISOString().split('T')[0]
+    link.download = `idea-cards-backup-${date}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const importData = async (file: File): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const json = e.target?.result as string
+          const data = JSON.parse(json)
+          if (Array.isArray(data)) {
+            // Validate basic structure of the first item (optional but good practice)
+            // Replacing current data with imported data
+            if (confirm(`确定要导入 ${data.length} 条卡片吗？这将覆盖当前数据！`)) {
+              ideas.value = data
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          } else {
+            alert('无效的文件格式：应为卡片数组。')
+            resolve(false)
+          }
+        } catch (error) {
+          console.error('Import failed', error)
+          alert('导入失败：无法解析 JSON 文件。')
+          resolve(false)
+        }
+      }
+      reader.onerror = () => {
+        alert('读取文件失败。')
+        resolve(false)
+      }
+      reader.readAsText(file)
+    })
+  }
+
   // Initialize
   loadIdeas()
 
   return {
     ideas,
     filter,
+    filteredIdeas,
+    allTags,
+    stats,
     addIdea,
     updateIdea,
     deleteIdea,
     toggleFavorite,
-    filteredIdeas,
-    allTags,
-    stats
+    exportData,
+    importData
   }
 })
