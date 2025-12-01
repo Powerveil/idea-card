@@ -7,6 +7,7 @@ import IdeaCard from '../components/IdeaCard.vue'
 import FilterBar from '../components/FilterBar.vue'
 import IdeaDetailModal from '../components/IdeaDetailModal.vue'
 import ImportModal from '../components/ImportModal.vue'
+import InsightStats from '../components/InsightStats.vue'
 import type { Idea } from '../stores/idea'
 
 const store = useIdeaStore()
@@ -15,6 +16,7 @@ const { filteredIdeas, stats, ideas } = storeToRefs(store)
 const showDetail = ref(false)
 const detailData = ref<any>(null)
 const isEditingDetail = ref(false)
+const showStats = ref(false)
 
 // Import state
 const showImportModal = ref(false)
@@ -120,6 +122,9 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       <div class="header-right">
         <div class="stats">总计: {{ stats.total }} | 收藏: {{ stats.favorites }}</div>
         <div class="data-controls">
+          <button @click="showStats = true" class="btn-tool" title="灵感分析">
+            📊 分析
+          </button>
           <button @click="store.exportData" class="btn-tool" title="导出数据备份">
             📥 导出
           </button>
@@ -174,6 +179,11 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       :existing-titles="existingTitles"
       @close="showImportModal = false"
       @confirm="handleImportConfirm"
+    />
+
+    <InsightStats
+      :show="showStats"
+      @close="showStats = false"
     />
   </div>
 </template>

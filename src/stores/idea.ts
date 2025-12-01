@@ -10,6 +10,8 @@ export interface Idea {
   createdAt: number
   updatedAt?: number
   isFavorite: boolean
+  source?: string // 想法来源
+  mood?: string // 心情
 }
 
 export interface FilterState {
@@ -127,6 +129,42 @@ export const useIdeaStore = defineStore('idea', () => {
     favorites: ideas.value.filter(i => i.isFavorite).length
   }))
 
+  const inspirationStats = computed(() => {
+    const sourceCount: Record<string, number> = {}
+    const moodCount: Record<string, number> = {}
+    const timeCount: Record<string, number> = {
+      '早晨 (6-12)': 0,
+      '下午 (12-18)': 0,
+      '晚上 (18-24)': 0,
+      '深夜 (0-6)': 0
+    }
+
+    ideas.value.forEach(idea => {
+      // Source stats
+      if (idea.source) {
+        sourceCount[idea.source] = (sourceCount[idea.source] || 0) + 1
+      }
+
+      // Mood stats
+      if (idea.mood) {
+        moodCount[idea.mood] = (moodCount[idea.mood] || 0) + 1
+      }
+
+      // Time stats
+      const hour = new Date(idea.createdAt).getHours()
+      if (hour >= 6 && hour < 12) timeCount['早晨 (6-12)']++
+      else if (hour >= 12 && hour < 18) timeCount['下午 (12-18)']++
+      else if (hour >= 18 && hour < 24) timeCount['晚上 (18-24)']++
+      else timeCount['深夜 (0-6)']++
+    })
+
+    return {
+      source: Object.entries(sourceCount).sort((a, b) => b[1] - a[1]),
+      mood: Object.entries(moodCount).sort((a, b) => b[1] - a[1]),
+      time: Object.entries(timeCount)
+    }
+  })
+
   // Export/Import Actions
   const exportData = () => {
     const dataStr = JSON.stringify(ideas.value, null, 2)
@@ -167,6 +205,7 @@ export const useIdeaStore = defineStore('idea', () => {
     filteredIdeas,
     allTags,
     stats,
+    inspirationStats,
     addIdea,
     updateIdea,
     deleteIdea,

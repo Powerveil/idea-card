@@ -75,8 +75,11 @@ const handleFormCancel = () => {
       <div v-else class="preview-mode-wrapper">
         <div class="modal-header">
           <div class="modal-title-group">
-            <h2>{{ idea.title }}</h2>
-            <div class="modal-date">{{ formattedDate }}</div>
+            <h2>{{ idea.title }} <span v-if="idea.mood">{{ idea.mood }}</span></h2>
+            <div class="meta-row">
+              <span class="modal-date">{{ formattedDate }}</span>
+              <span v-if="idea.source" class="source-badge">📍 {{ idea.source }}</span>
+            </div>
           </div>
           <div class="header-actions">
             <button class="edit-btn" @click="toggleEdit" title="编辑">✏️</button>
@@ -167,12 +170,27 @@ const handleFormCancel = () => {
 
 .modal-title-group h2 {
   margin: 0 0 5px 0;
+  font-size: 1.5rem;
   color: var(--text-main);
 }
 
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .modal-date {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
+}
+
+.source-badge {
+  font-size: 0.85rem;
+  background-color: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #666;
 }
 
 .header-actions {

@@ -81,11 +81,15 @@ const formattedDate = computed(() => {
 <template>
   <div class="card" :style="{ borderTopColor: idea.color !== '#ffffff' ? idea.color : '#eee' }">
     <div class="card-header" @click="emit('preview', idea.id)" style="cursor: pointer;">
-      <div class="card-title">{{ idea.title }}</div>
+      <div class="card-title">
+        {{ idea.title }}
+        <span v-if="idea.mood" class="mood-badge" title="心情">{{ idea.mood }}</span>
+      </div>
       <div class="card-date">{{ formattedDate }}</div>
     </div>
     <div class="card-content" v-html="parsedContent" @click="emit('preview', idea.id)" style="cursor: pointer;"></div>
     <div class="card-tags">
+      <span v-if="idea.source" class="source-tag" title="来源">📍 {{ idea.source }}</span>
       <span v-for="tag in idea.tags" :key="tag" class="card-tag">#{{ tag }}</span>
     </div>
     <div class="card-actions">
@@ -132,36 +136,51 @@ const formattedDate = computed(() => {
 }
 
 .card-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mood-badge {
   font-size: 1.2rem;
-  font-weight: 700;
-  margin-right: 10px;
-  word-break: break-word;
+  line-height: 1;
 }
 
 .card-date {
   font-size: 0.8rem;
   color: var(--text-secondary);
-  white-space: nowrap;
 }
 
 .card-content {
-  flex: 1;
   margin-bottom: 15px;
-  font-size: 0.95rem;
   color: #555;
-  overflow: hidden;
-  word-wrap: break-word;
+  line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 8px;
   margin-bottom: 15px;
 }
 
+.source-tag {
+  font-size: 0.8rem;
+  color: #666;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px dashed #ccc;
+}
+
 .card-tag {
-  background: #eef2f7;
+  background-color: #e9ecef;
   color: var(--primary-color);
   padding: 3px 8px;
   border-radius: 10px;

@@ -13,6 +13,16 @@ const COLORS = [
   { value: '#e8daef', name: '紫色' }
 ]
 
+const SOURCES = ['散步', '洗澡', '睡前', '通勤', '阅读', '运动', '聊天', '工作', '其他']
+const MOODS = [
+  { value: '🤩', label: '兴奋' },
+  { value: '😌', label: '平静' },
+  { value: '🤔', label: '困惑' },
+  { value: '😤', label: '焦虑' },
+  { value: '💡', label: '顿悟' },
+  { value: '😴', label: '疲惫' }
+]
+
 const props = defineProps<{
   editData?: {
     id: string
@@ -20,12 +30,14 @@ const props = defineProps<{
     content: string
     tags: string[]
     color: string
+    source?: string
+    mood?: string
   } | null
   variant?: 'sidebar' | 'modal'
 }>()
 
 const emit = defineEmits<{
-  (e: 'submit', data: { title: string, content: string, tags: string[], color: string }): void
+  (e: 'submit', data: { title: string, content: string, tags: string[], color: string, source?: string, mood?: string }): void
   (e: 'cancel'): void
 }>()
 
@@ -33,7 +45,9 @@ const formData = reactive({
   title: '',
   content: '',
   tags: [] as string[],
-  color: COLORS[0].value
+  color: COLORS[0].value,
+  source: '',
+  mood: ''
 })
 
 const tagInput = ref('')
@@ -45,6 +59,8 @@ const resetForm = () => {
   formData.content = ''
   formData.tags = []
   formData.color = COLORS[0].value
+  formData.source = ''
+  formData.mood = ''
   tagInput.value = ''
   if (vditor.value) {
     vditor.value.setValue('')
@@ -58,6 +74,8 @@ watch(() => props.editData, (newVal) => {
     formData.content = newVal.content
     formData.tags = [...newVal.tags]
     formData.color = newVal.color
+    formData.source = newVal.source || ''
+    formData.mood = newVal.mood || ''
     if (vditor.value) {
       vditor.value.setValue(newVal.content)
     }
@@ -162,6 +180,39 @@ onMounted(() => {
         </div>
       </div>
 
+      <div class="form-row">
+        <div class="form-group half">
+          <label>心情状态</label>
+          <div class="mood-picker">
+            <div 
+              v-for="m in MOODS" 
+              :key="m.value"
+              class="mood-option"
+              :class="{ selected: formData.mood === m.value }"
+              @click="formData.mood = m.value"
+              :title="m.label"
+            >
+              {{ m.value }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group half">
+          <label>想法来源</label>
+          <div class="source-picker">
+            <div 
+              v-for="s in SOURCES" 
+              :key="s"
+              class="source-option"
+              :class="{ selected: formData.source === s }"
+              @click="formData.source = s"
+            >
+              {{ s }}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="btn">{{ editData ? '更新卡片' : '添加卡片' }}</button>
         <button 
@@ -234,8 +285,8 @@ onMounted(() => {
 }
 
 .color-option.selected {
-  border-color: #333;
-  transform: scale(1.1);
+  transform: scale(1.2);
+  border: 2px solid var(--text-main);
 }
 
 .tags-input-container {
@@ -272,7 +323,71 @@ onMounted(() => {
   font-weight: bold;
 }
 
+.form-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.form-group.half {
+  flex: 1;
+  min-width: 200px;
+}
+
+.mood-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mood-option {
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+  line-height: 1;
+}
+
+.mood-option:hover {
+  transform: scale(1.2);
+  background-color: rgba(0,0,0,0.05);
+}
+
+.mood-option.selected {
+  transform: scale(1.2);
+  background-color: rgba(0,0,0,0.1);
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.source-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.source-option {
+  font-size: 0.9rem;
+  padding: 4px 10px;
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.source-option:hover {
+  background-color: #e0e0e0;
+}
+
+.source-option.selected {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
 .form-actions {
+  margin-top: 20px;
   display: flex;
   gap: 10px;
 }
