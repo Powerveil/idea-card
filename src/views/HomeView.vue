@@ -23,6 +23,9 @@ const showImportModal = ref(false)
 const importCandidates = ref<Idea[]>([])
 const existingTitles = ref<Set<string>>(new Set())
 
+// Add Idea state
+const showAddModal = ref(false)
+
 const handleEdit = (id: string) => {
   const idea = store.ideas.find(i => i.id === id)
   if (idea) {
@@ -49,7 +52,9 @@ const handleDelete = (id: string) => {
 
 const handleFormSubmit = (data: any) => {
   store.addIdea(data)
+  showAddModal.value = false
 }
+
 
 
 const handleUpdate = (data: any) => {
@@ -122,6 +127,9 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       <div class="header-right">
         <div class="stats">总计: {{ stats.total }} | 收藏: {{ stats.favorites }}</div>
         <div class="data-controls">
+          <button @click="showAddModal = true" class="btn-primary" title="添加新想法">
+            ➕ 新想法
+          </button>
           <button @click="showStats = true" class="btn-tool" title="灵感分析">
             📊 分析
           </button>
@@ -145,11 +153,7 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
     <FilterBar />
 
     <div class="main-layout">
-      <IdeaForm 
-        @submit="handleFormSubmit" 
-      />
-
-      <main class="cards-grid">
+      <main class="cards-grid full-width">
         <div v-if="filteredIdeas.length === 0" class="empty-state">
           没有找到符合条件的卡片。
         </div>
@@ -165,6 +169,18 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       </main>
     </div>
     
+    <!-- Add Idea Modal -->
+    <div v-if="showAddModal" class="modal-overlay" @click="showAddModal = false">
+      <div class="modal-content large" @click.stop>
+        <button class="close-btn" @click="showAddModal = false">&times;</button>
+        <IdeaForm 
+          variant="modal"
+          @submit="handleFormSubmit"
+          @cancel="showAddModal = false"
+        />
+      </div>
+    </div>
+
     <IdeaDetailModal 
       :show="showDetail" 
       :idea="detailData"
@@ -251,23 +267,92 @@ h1 {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.main-layout {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 30px;
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
 }
 
-@media (max-width: 900px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.main-layout {
+  display: block;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
-  align-content: start;
+  align-items: start;
+}
+
+.cards-grid.full-width {
+  width: 100%;
+}
+
+/* Reuse existing modal styles or add specific ones for add modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  animation: modal-in 0.2s ease-out;
+}
+
+.modal-content.large {
+  max-width: 800px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #999;
+  z-index: 10;
+  line-height: 1;
+}
+
+@keyframes modal-in {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .empty-state {

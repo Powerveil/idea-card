@@ -240,7 +240,7 @@ onMounted(() => {
 .card-form.modal-variant {
   position: static;
   box-shadow: none;
-  padding: 0;
+  padding: 20px;
   background: transparent;
 }
 
