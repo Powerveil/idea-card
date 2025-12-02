@@ -159,6 +159,7 @@ const formattedDate = computed(() => {
   color: #555;
   line-height: 1.5;
   font-size: 0.95rem;
+  flex: 1; /* Push actions to bottom */
 }
 
 .card-tags {
@@ -193,6 +194,7 @@ const formattedDate = computed(() => {
   gap: 10px;
   border-top: 1px solid #eee;
   padding-top: 10px;
+  margin-top: auto; /* Ensure it stays at bottom */
 }
 
 .action-btn {

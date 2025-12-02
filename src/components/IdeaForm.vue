@@ -110,7 +110,7 @@ onMounted(() => {
   vditor.value = new Vditor(vditorId, {
     height: 360,
     toolbarConfig: {
-      pin: true,
+      pin: false, // Disable pin to prevent overlapping
     },
     cache: {
       enable: false,
