@@ -187,7 +187,7 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       :show="showDetail" 
       :idea="detailData"
       :is-editing="isEditingDetail" 
-      @close="showDetail = false" 
+      @close="() => { showDetail = false; isEditingDetail = false }" 
       @update="handleUpdate"
     />
 

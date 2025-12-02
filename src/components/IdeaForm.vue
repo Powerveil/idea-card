@@ -106,15 +106,27 @@ const handleSubmit = () => {
   }
 }
 
+const vditorOptions = {
+  height: 360,
+  toolbarConfig: {
+    pin: false, // Disable pin to prevent overlapping
+  },
+  cache: {
+    enable: false,
+  },
+  toolbar: [
+    'emoji', 'headings', 'bold', 'italic', 'strike', 'link', '|',
+    'list', 'ordered-list', 'check', 'outdent', 'indent', '|',
+    'quote', 'line', 'code', 'inline-code', 'insert-before', 'insert-after', '|',
+    'upload', 'record', 'table', '|',
+    'undo', 'redo', '|',
+    'fullscreen', 'edit-mode', 'both', 'preview'
+  ],
+}
+
 onMounted(() => {
   vditor.value = new Vditor(vditorId, {
-    height: 360,
-    toolbarConfig: {
-      pin: false, // Disable pin to prevent overlapping
-    },
-    cache: {
-      enable: false,
-    },
+    ...vditorOptions,
     after: () => {
       if (props.editData) {
         vditor.value?.setValue(props.editData.content)
