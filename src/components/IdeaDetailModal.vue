@@ -24,6 +24,13 @@ watch(() => props.isEditing, (val) => {
   internalIsEditing.value = !!val
 }, { immediate: true })
 
+// 监听显示状态，确保每次打开时重置编辑状态
+watch(() => props.show, (val) => {
+  if (val) {
+    internalIsEditing.value = !!props.isEditing
+  }
+})
+
 const formattedDate = computed(() => {
   if (!props.idea) return ''
   return new Date(props.idea.createdAt).toLocaleDateString() + ' ' + 
