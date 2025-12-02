@@ -127,9 +127,6 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       <div class="header-right">
         <div class="stats">总计: {{ stats.total }} | 收藏: {{ stats.favorites }}</div>
         <div class="data-controls">
-          <button @click="showAddModal = true" class="btn-primary" title="添加新想法">
-            ➕ 新想法
-          </button>
           <button @click="showStats = true" class="btn-tool" title="灵感分析">
             📊 分析
           </button>
@@ -169,6 +166,11 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       </main>
     </div>
     
+    <!-- FAB for Add Idea -->
+    <button class="fab-add" @click="showAddModal = true" title="添加新想法">
+      ➕
+    </button>
+
     <!-- Add Idea Modal -->
     <div v-if="showAddModal" class="modal-overlay" @click="showAddModal = false">
       <div class="modal-content large" @click.stop>
@@ -344,6 +346,36 @@ h1 {
   line-height: 1;
 }
 
+.fab-add {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  z-index: 100;
+}
+
+.fab-add:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  background-color: #2c3e50;
+}
+
+.fab-add:active {
+  transform: translateY(0) scale(0.95);
+}
+
 @keyframes modal-in {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -352,6 +384,14 @@ h1 {
 @media (max-width: 768px) {
   .cards-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .fab-add {
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
   }
 }
 
