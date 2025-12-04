@@ -12,6 +12,7 @@ export interface Idea {
   isFavorite: boolean
   source?: string // 想法来源
   mood?: string // 心情
+  aiAnalysis?: string // AI 分析内容
 }
 
 export interface FilterState {
