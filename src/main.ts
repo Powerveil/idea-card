@@ -22,7 +22,8 @@ onLCP(sendToAnalytics)
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: HomeView }
+    { path: '/', component: HomeView },
+    { path: '/changelog', component: () => import('./views/ChangelogView.vue') }
   ]
 })
 

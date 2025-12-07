@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useIdeaStore } from '../stores/idea'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
 }>()
 

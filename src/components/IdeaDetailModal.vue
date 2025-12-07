@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, onMounted, ref, watch } from 'vue'
+import { defineProps, defineEmits, computed, ref, watch } from 'vue'
 import type { Idea } from '../stores/idea'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
@@ -50,7 +50,7 @@ watch(() => props.isEditing, (val) => {
 // 渲染 AI 分析的 Markdown
 const renderAiMarkdown = async () => {
   if (aiPreviewContainer.value && aiAnalysis.value) {
-    await Vditor.preview(aiPreviewContainer.value, aiAnalysis.value, {
+    await Vditor.preview(aiPreviewContainer.value as HTMLDivElement, aiAnalysis.value, {
       mode: 'light',
     })
   }
@@ -229,7 +229,7 @@ const formattedDate = computed(() => {
 watch(() => [props.show, props.idea, internalIsEditing.value], async ([show, idea, isEditing]) => {
   if (show && idea && !isEditing && previewContainer.value) {
     // 使用 Vditor 的预览渲染
-    await Vditor.preview(previewContainer.value, (idea as Idea).content, {
+    await Vditor.preview(previewContainer.value as HTMLDivElement, (idea as Idea).content, {
       mode: 'light',
     })
   }

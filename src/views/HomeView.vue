@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useIdeaStore } from '../stores/idea'
 import { storeToRefs } from 'pinia'
 import IdeaForm from '../components/IdeaForm.vue'
@@ -11,7 +12,8 @@ import InsightStats from '../components/InsightStats.vue'
 import type { Idea } from '../stores/idea'
 
 const store = useIdeaStore()
-const { filteredIdeas, stats, ideas } = storeToRefs(store)
+const router = useRouter()
+const { filteredIdeas, stats } = storeToRefs(store)
 
 const showDetail = ref(false)
 const detailData = ref<any>(null)
@@ -127,6 +129,9 @@ const handleImportConfirm = async (selectedItems: Idea[]) => {
       <div class="header-right">
         <div class="stats">总计: {{ stats.total }} | 收藏: {{ stats.favorites }}</div>
         <div class="data-controls">
+          <button @click="router.push('/changelog')" class="btn-tool" title="更新日志">
+            📢 日志
+          </button>
           <button @click="showStats = true" class="btn-tool" title="灵感分析">
             📊 分析
           </button>
