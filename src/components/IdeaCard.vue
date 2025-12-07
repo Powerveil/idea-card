@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Idea } from '../stores/idea'
+import { Delete, Star, Edit, View, StarFilled } from '@element-plus/icons-vue'
 
 const props = defineProps<{
   idea: Idea
@@ -79,143 +80,143 @@ const formattedDate = computed(() => {
 </script>
 
 <template>
-  <div class="card" :style="{ borderTopColor: idea.color !== '#ffffff' ? idea.color : '#eee' }">
-    <div class="card-header" @click="emit('preview', idea.id)" style="cursor: pointer;">
-      <div class="card-title">
-        {{ idea.title }}
-        <span v-if="idea.mood" class="mood-badge" title="心情">{{ idea.mood }}</span>
+  <el-card 
+    class="idea-card" 
+    shadow="hover" 
+    :body-style="{ padding: '0px', display: 'flex', flexDirection: 'column', height: '100%' }"
+  >
+    <div 
+      class="card-color-strip" 
+      :style="{ backgroundColor: idea.color !== '#ffffff' ? idea.color : '#eee' }"
+    ></div>
+    
+    <div class="card-content-wrapper">
+      <div class="card-header" @click="emit('preview', idea.id)">
+        <div class="card-title">
+          <h3>{{ idea.title }}</h3>
+          <el-tag v-if="idea.mood" size="default" effect="plain" round>{{ idea.mood }}</el-tag>
+        </div>
+        <div class="card-date">{{ formattedDate }}</div>
       </div>
-      <div class="card-date">{{ formattedDate }}</div>
+      
+      <div 
+        class="card-preview" 
+        v-html="parsedContent" 
+        @click="emit('preview', idea.id)"
+      ></div>
+      
+      <div class="card-footer">
+        <div class="card-tags">
+          <el-tag v-if="idea.source" size="default" type="info" effect="light" class="source-tag">
+            📍 {{ idea.source }}
+          </el-tag>
+          <el-tag 
+            v-for="tag in idea.tags" 
+            :key="tag" 
+            size="default" 
+            effect="plain"
+          >
+            #{{ tag }}
+          </el-tag>
+        </div>
+        
+        <div class="card-actions">
+          <el-button-group>
+            <el-button :icon="View" circle size="large" @click="emit('preview', idea.id)" />
+            <el-button :icon="Edit" circle size="large" @click="emit('edit', idea.id)" />
+            <el-button 
+              :icon="idea.isFavorite ? StarFilled : Star" 
+              circle 
+              size="large" 
+              :type="idea.isFavorite ? 'warning' : 'default'"
+              @click="emit('favorite', idea.id)" 
+            />
+            <el-button :icon="Delete" circle size="large" type="danger" plain @click="emit('delete', idea.id)" />
+          </el-button-group>
+        </div>
+      </div>
     </div>
-    <div class="card-content" v-html="parsedContent" @click="emit('preview', idea.id)" style="cursor: pointer;"></div>
-    <div class="card-tags">
-      <span v-if="idea.source" class="source-tag" title="来源">📍 {{ idea.source }}</span>
-      <span v-for="tag in idea.tags" :key="tag" class="card-tag">#{{ tag }}</span>
-    </div>
-    <div class="card-actions">
-      <button class="action-btn preview" @click="emit('preview', idea.id)" title="预览" aria-label="预览">👁️</button>
-      <button class="action-btn edit" @click="emit('edit', idea.id)" title="编辑" aria-label="编辑">✏️</button>
-      <button 
-        class="action-btn favorite" 
-        :class="{ active: idea.isFavorite }" 
-        @click="emit('favorite', idea.id)"
-        title="收藏"
-        aria-label="收藏"
-      >
-        {{ idea.isFavorite ? '★' : '☆' }}
-      </button>
-      <button class="action-btn delete" @click="emit('delete', idea.id)" title="删除" aria-label="删除">🗑️</button>
-    </div>
-  </div>
+  </el-card>
 </template>
 
 <style scoped>
-.card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border-top: 5px solid transparent;
-  position: relative;
+.idea-card {
   height: 100%;
+  transition: transform 0.2s;
+  border: none;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-hover);
+.idea-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-color-strip {
+  height: 6px;
+  width: 100%;
+}
+
+.card-content-wrapper {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .card-title {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: var(--text-main);
   display: flex;
-  align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 5px;
 }
 
-.mood-badge {
-  font-size: 1.2rem;
-  line-height: 1;
+.card-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  line-height: 1.4;
 }
 
 .card-date {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: var(--el-text-color-secondary);
 }
 
-.card-content {
-  margin-bottom: 15px;
-  color: #555;
-  line-height: 1.5;
+.card-preview {
+  flex: 1;
+  color: var(--el-text-color-regular);
   font-size: 0.95rem;
-  flex: 1; /* Push actions to bottom */
+  line-height: 1.6;
+  margin-bottom: 15px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 15px;
+  gap: 5px;
 }
 
 .source-tag {
-  font-size: 0.8rem;
-  color: #666;
-  background-color: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px dashed #ccc;
-}
-
-.card-tag {
-  background-color: #e9ecef;
-  color: var(--primary-color);
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
+  margin-right: 2px;
 }
 
 .card-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-  margin-top: auto; /* Ensure it stays at bottom */
-}
-
-.action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  transition: color 0.2s;
-  padding: 5px;
-}
-
-.action-btn:hover {
-  color: var(--primary-color);
-}
-
-.action-btn.delete:hover {
-  color: var(--danger);
-}
-
-.action-btn.favorite.active {
-  color: var(--warning);
+  margin-left: auto;
 }
 </style>

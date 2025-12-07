@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useIdeaStore } from '../stores/idea'
 
-defineProps<{
+const props = defineProps<{
   show: boolean
 }>()
 
@@ -21,224 +21,157 @@ const getMaxVal = (arr: [string, number][]) => {
 const timeMax = computed(() => getMaxVal(stats.value.time))
 const sourceMax = computed(() => getMaxVal(stats.value.source))
 const moodMax = computed(() => getMaxVal(stats.value.mood))
+
+const visible = computed({
+  get: () => props.show,
+  set: (val) => {
+    if (!val) emit('close')
+  }
+})
 </script>
 
 <template>
-  <div v-if="show" class="modal-overlay" @click="emit('close')">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2>📊 个人灵感模式分析</h2>
-        <button class="close-btn" @click="emit('close')">&times;</button>
-      </div>
-      
-      <div class="modal-body">
-        <div class="analysis-section">
-          <h3>⏰ 灵感时刻</h3>
-          <p class="section-desc">分析你最容易产生灵感的时间段</p>
-          <div class="chart-container">
-            <div v-for="[label, count] in stats.time" :key="label" class="chart-row">
-              <div class="row-label">{{ label }}</div>
-              <div class="row-bar-wrapper">
-                <div 
-                  class="row-bar time" 
-                  :style="{ width: (count / timeMax * 100) + '%' }"
-                ></div>
-              </div>
-              <div class="row-value">{{ count }}</div>
+  <el-dialog
+    v-model="visible"
+    title="📊 个人灵感模式分析"
+    width="800px"
+    destroy-on-close
+    align-center
+  >
+    <div class="modal-body">
+      <div class="analysis-section">
+        <h3>⏰ 灵感时刻</h3>
+        <p class="section-desc">分析你最容易产生灵感的时间段</p>
+        <div class="chart-container">
+          <div v-for="[label, count] in stats.time" :key="label" class="chart-row">
+            <div class="row-label">{{ label }}</div>
+            <div class="row-bar-wrapper">
+              <el-progress 
+                :percentage="(count / timeMax * 100) || 0" 
+                :stroke-width="15"
+                :show-text="false"
+                :color="'#4a90e2'"
+              />
             </div>
+            <div class="row-value">{{ count }}</div>
           </div>
         </div>
+      </div>
 
-        <div class="analysis-grid">
-          <div class="analysis-section half">
+      <el-row :gutter="20" class="analysis-grid">
+        <el-col :span="12">
+          <div class="analysis-section">
             <h3>📍 灵感来源</h3>
             <div class="chart-container">
-              <div v-if="stats.source.length === 0" class="empty-chart">暂无数据</div>
-              <div v-for="[label, count] in stats.source.slice(0, 5)" :key="label" class="chart-row small">
+              <el-empty v-if="stats.source.length === 0" description="暂无数据" :image-size="60" />
+              <div v-else v-for="[label, count] in stats.source.slice(0, 5)" :key="label" class="chart-row small">
                 <div class="row-label">{{ label }}</div>
                 <div class="row-bar-wrapper">
-                  <div 
-                    class="row-bar source" 
-                    :style="{ width: (count / sourceMax * 100) + '%' }"
-                  ></div>
+                  <el-progress 
+                    :percentage="(count / sourceMax * 100) || 0" 
+                    :stroke-width="10"
+                    :show-text="false"
+                    status="success"
+                  />
                 </div>
                 <div class="row-value">{{ count }}</div>
               </div>
             </div>
           </div>
+        </el-col>
 
-          <div class="analysis-section half">
+        <el-col :span="12">
+          <div class="analysis-section">
             <h3>🥰 心情分布</h3>
             <div class="chart-container">
-              <div v-if="stats.mood.length === 0" class="empty-chart">暂无数据</div>
-              <div v-for="[label, count] in stats.mood.slice(0, 5)" :key="label" class="chart-row small">
+              <el-empty v-if="stats.mood.length === 0" description="暂无数据" :image-size="60" />
+              <div v-else v-for="[label, count] in stats.mood.slice(0, 5)" :key="label" class="chart-row small">
                 <div class="row-label emoji-label">{{ label }}</div>
                 <div class="row-bar-wrapper">
-                  <div 
-                    class="row-bar mood" 
-                    :style="{ width: (count / moodMax * 100) + '%' }"
-                  ></div>
+                  <el-progress 
+                    :percentage="(count / moodMax * 100) || 0" 
+                    :stroke-width="10"
+                    :show-text="false"
+                    status="warning"
+                  />
                 </div>
                 <div class="row-value">{{ count }}</div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </el-col>
+      </el-row>
     </div>
-  </div>
+  </el-dialog>
 </template>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(3px);
-}
-
-.modal-content {
-  background: white;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  animation: modal-in 0.3s ease-out;
-}
-
-@keyframes modal-in {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-header {
-  padding: 20px 25px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  color: var(--text-main);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.8rem;
-  cursor: pointer;
-  color: #999;
-  line-height: 1;
-}
-
 .modal-body {
-  padding: 25px;
-  overflow-y: auto;
+  padding: 10px;
 }
 
 .analysis-section {
   margin-bottom: 30px;
 }
 
-.analysis-section h3 {
+.analysis-grid .analysis-section {
+  background: var(--el-fill-color-light);
+  padding: 15px;
+  border-radius: 8px;
+  height: 100%;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
   font-size: 1.1rem;
-  margin: 0 0 5px 0;
-  color: var(--text-main);
+  color: var(--el-text-color-primary);
 }
 
 .section-desc {
+  color: var(--el-text-color-secondary);
   font-size: 0.9rem;
-  color: #7f8c8d;
-  margin: 0 0 15px 0;
-}
-
-.analysis-grid {
-  display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.analysis-section.half {
-  flex: 1;
-  min-width: 250px;
-  margin-bottom: 0;
+  margin-bottom: 15px;
 }
 
 .chart-container {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .chart-row {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.chart-row:last-child {
-  margin-bottom: 0;
-}
-
-.chart-row.small {
-  margin-bottom: 8px;
+  gap: 10px;
 }
 
 .row-label {
-  width: 100px;
+  width: 50px;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--el-text-color-regular);
+  text-align: right;
 }
 
-.emoji-label {
-  width: 40px;
-  font-size: 1.2rem;
+.chart-row.small .row-label {
+  width: 70px; /* More space for source/mood names */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .row-bar-wrapper {
   flex: 1;
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
-  margin: 0 10px;
-  overflow: hidden;
 }
-
-.row-bar {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease-out;
-}
-
-.row-bar.time { background-color: #3498db; }
-.row-bar.source { background-color: #2ecc71; }
-.row-bar.mood { background-color: #e67e22; }
 
 .row-value {
   width: 30px;
-  text-align: right;
-  font-size: 0.9rem;
+  text-align: left;
   font-weight: bold;
-  color: #333;
+  color: var(--el-text-color-primary);
 }
 
-.empty-chart {
-  text-align: center;
-  color: #999;
-  font-size: 0.9rem;
-  padding: 20px 0;
+.emoji-label {
+  font-size: 1.2rem;
 }
 </style>

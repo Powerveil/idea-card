@@ -2,6 +2,8 @@
 import { ref, reactive, watch, onMounted } from 'vue'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
+import { Plus } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const COLORS = [
   { value: '#ffffff', name: '白色' },
@@ -100,315 +102,198 @@ const handleSubmit = () => {
   if (vditor.value) {
     formData.content = vditor.value.getValue()
   }
-  emit('submit', { ...formData })
-  if (!props.editData) {
-    resetForm()
-  }
-}
 
-const vditorOptions = {
-  height: 360,
-  toolbarConfig: {
-    pin: false, // Disable pin to prevent overlapping
-  },
-  cache: {
-    enable: false,
-  },
-  toolbar: [
-    'emoji', 'headings', 'bold', 'italic', 'strike', 'link', '|',
-    'list', 'ordered-list', 'check', 'outdent', 'indent', '|',
-    'quote', 'line', 'code', 'inline-code', 'insert-before', 'insert-after', '|',
-    'upload', 'record', 'table', '|',
-    'undo', 'redo', '|',
-    'fullscreen', 'edit-mode', 'both', 'preview'
-  ],
+  if (!formData.title.trim()) {
+    ElMessage.warning('标题不能为空')
+    return
+  }
+  if (!formData.content.trim()) {
+    ElMessage.warning('内容不能为空')
+    return
+  }
+
+  emit('submit', { ...formData })
 }
 
 onMounted(() => {
   vditor.value = new Vditor(vditorId, {
-    ...vditorOptions,
+    height: 360,
+    width: '100%',
+    toolbarConfig: {
+      pin: true,
+    },
+    cache: {
+      enable: false,
+    },
     after: () => {
       if (props.editData) {
         vditor.value?.setValue(props.editData.content)
       }
     },
-    input: (value) => {
-      formData.content = value
-    }
+    toolbar: [
+      'emoji', 'headings', 'bold', 'italic', 'strike', 'link', '|',
+      'list', 'ordered-list', 'check', 'outdent', 'indent', '|',
+      'quote', 'line', 'code', 'inline-code', 'insert-before', 'insert-after', '|',
+      'upload', 'record', 'table', '|',
+      'undo', 'redo', '|',
+      'fullscreen', 'edit-mode',
+      {
+        name: 'more',
+        toolbar: [
+          'both',
+          'code-theme',
+          'content-theme',
+          'export',
+          'outline',
+          'preview',
+          'devtools',
+          'info',
+          'help',
+        ],
+      }
+    ]
   })
 })
 </script>
 
 <template>
-  <aside class="card-form" :class="{ 'modal-variant': variant === 'modal' }">
-    <h2>{{ editData ? '编辑想法' : '添加新想法' }}</h2>
-    <form @submit.prevent="handleSubmit">
-      <div class="form-group">
-        <label for="title">标题 *</label>
-        <input 
-          id="title" 
-          v-model="formData.title" 
-          type="text" 
-          class="form-control" 
-          maxlength="50" 
-          required 
-          placeholder="输入标题 (最多50字)"
-        >
-      </div>
+  <el-form :model="formData" label-position="top" class="idea-form">
+    <el-form-item label="标题">
+      <el-input 
+        v-model="formData.title" 
+        placeholder="给你的想法起个标题..." 
+        size="large"
+        clearable
+      />
+    </el-form-item>
+
+    <el-form-item label="内容">
+      <div :id="vditorId" class="vditor-wrapper"></div>
+    </el-form-item>
+
+    <el-row :gutter="20">
+      <el-col :span="12" :xs="24">
+        <el-form-item label="标签">
+          <div class="tags-container">
+            <el-tag
+              v-for="tag in formData.tags"
+              :key="tag"
+              closable
+              :disable-transitions="false"
+              @close="removeTag(tag)"
+            >
+              {{ tag }}
+            </el-tag>
+            <el-input
+              v-if="formData.tags.length < 5"
+              v-model="tagInput"
+              class="input-new-tag"
+              size="small"
+              placeholder="+ 标签 (回车添加)"
+              @keyup.enter="addTag"
+              @blur="addTag"
+            />
+          </div>
+        </el-form-item>
+      </el-col>
       
-      <div class="form-group">
-        <label for="content">内容 (Markdown)</label>
-        <div :id="vditorId"></div>
-      </div>
-
-      <div class="form-group">
-        <label>标签</label>
-        <div class="tags-input-container">
-          <div v-for="tag in formData.tags" :key="tag" class="tag-chip">
-            {{ tag }} <span @click="removeTag(tag)">×</span>
-          </div>
-          <input 
-            v-model="tagInput" 
-            @keydown.enter.prevent="addTag" 
-            @keydown.space.prevent="addTag"
-            type="text" 
-            placeholder="输入标签按回车添加"
-          >
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>颜色标记</label>
-        <div class="color-picker">
-          <div 
-            v-for="color in COLORS" 
-            :key="color.value"
-            class="color-option"
-            :class="{ selected: formData.color === color.value }"
-            :style="{ backgroundColor: color.value }"
-            @click="formData.color = color.value"
-            :title="color.name"
-          ></div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group half">
-          <label>心情状态</label>
-          <div class="mood-picker">
+      <el-col :span="12" :xs="24">
+        <el-form-item label="颜色">
+          <div class="color-options">
             <div 
-              v-for="m in MOODS" 
-              :key="m.value"
-              class="mood-option"
-              :class="{ selected: formData.mood === m.value }"
-              @click="formData.mood = m.value"
-              :title="m.label"
-            >
+              v-for="c in COLORS" 
+              :key="c.value" 
+              class="color-circle"
+              :style="{ backgroundColor: c.value }"
+              :class="{ selected: formData.color === c.value }"
+              @click="formData.color = c.value"
+              :title="c.name"
+            ></div>
+          </div>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20">
+      <el-col :span="12" :xs="24">
+        <el-form-item label="来源">
+          <el-select v-model="formData.source" placeholder="选择灵感来源" style="width: 100%" clearable>
+             <el-option v-for="s in SOURCES" :key="s" :label="s" :value="s" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      
+      <el-col :span="12" :xs="24">
+        <el-form-item label="心情">
+          <el-radio-group v-model="formData.mood">
+            <el-radio-button v-for="m in MOODS" :key="m.value" :label="m.value" :value="m.value">
               {{ m.value }}
-            </div>
-          </div>
-        </div>
+            </el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+      </el-col>
+    </el-row>
 
-        <div class="form-group half">
-          <label>想法来源</label>
-          <div class="source-picker">
-            <div 
-              v-for="s in SOURCES" 
-              :key="s"
-              class="source-option"
-              :class="{ selected: formData.source === s }"
-              @click="formData.source = s"
-            >
-              {{ s }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn">{{ editData ? '更新卡片' : '添加卡片' }}</button>
-        <button 
-          v-if="editData" 
-          type="button" 
-          class="btn btn-secondary" 
-          @click="emit('cancel')"
-        >取消</button>
-      </div>
-    </form>
-  </aside>
+    <div class="form-actions">
+      <el-button @click="emit('cancel')">取消</el-button>
+      <el-button type="primary" @click="handleSubmit">保存想法</el-button>
+    </div>
+  </el-form>
 </template>
 
 <style scoped>
-.card-form {
-  background: var(--card-bg);
-  padding: 25px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  height: fit-content;
-  position: sticky;
-  top: 20px;
-}
-
-.card-form.modal-variant {
-  position: static;
-  box-shadow: none;
-  padding: 20px;
-  background: transparent;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.form-control {
-  width: 100%;
+.idea-form {
   padding: 10px;
-  border: 1px solid #ddd;
+}
+
+.vditor-wrapper {
+  margin-top: 5px;
   border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
+  overflow: hidden;
 }
 
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.color-picker {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.color-option {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform 0.2s;
-}
-
-.color-option.selected {
-  transform: scale(1.2);
-  border: 2px solid var(--text-main);
-}
-
-.tags-input-container {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 5px;
+.tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  background: white;
-}
-
-.tags-input-container input {
-  border: none;
-  padding: 5px;
-  flex: 1;
-  min-width: 60px;
-  outline: none;
-}
-
-.tag-chip {
-  background: var(--primary-color);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.tag-chip span {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.form-group.half {
-  flex: 1;
-  min-width: 200px;
-}
-
-.mood-picker {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.mood-option {
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 50%;
-  transition: transform 0.2s, background-color 0.2s;
-  line-height: 1;
-}
-
-.mood-option:hover {
-  transform: scale(1.2);
-  background-color: rgba(0,0,0,0.05);
-}
-
-.mood-option.selected {
-  transform: scale(1.2);
-  background-color: rgba(0,0,0,0.1);
-  box-shadow: 0 0 0 2px var(--primary-color);
-}
-
-.source-picker {
-  display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.input-new-tag {
+  width: 120px;
+}
+
+.color-options {
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.source-option {
-  font-size: 0.9rem;
-  padding: 4px 10px;
-  background-color: #f0f0f0;
-  border-radius: 15px;
+.color-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid transparent;
 }
 
-.source-option:hover {
-  background-color: #e0e0e0;
-}
-
-.source-option.selected {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+.color-circle.selected {
+  border-color: var(--el-color-primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
 .form-actions {
-  margin-top: 20px;
   display: flex;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
 }
 
-.btn {
-  flex: 1;
-}
-
-.btn-secondary {
-  background: var(--text-secondary);
+/* Vditor overrides if needed */
+:deep(.vditor) {
+  border-color: var(--el-border-color);
+  border-radius: var(--el-border-radius-base);
 }
 </style>

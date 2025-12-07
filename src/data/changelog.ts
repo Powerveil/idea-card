@@ -9,6 +9,13 @@ export interface ChangeLogEntry {
 
 export const changelogs: ChangeLogEntry[] = [
   {
+    id: 'e1e1e1e',
+    date: '2025-12-07 14:45',
+    content: '重构 UI 框架：迁移至 Element Plus，优化界面交互与响应式布局，修复 AI 分析按钮丢失问题',
+    category: 'Refactor',
+    author: 'TraeAI'
+  },
+  {
     id: '10fe04c',
     date: '2025-12-07 02:30',
     content: '优化 AI 分析功能：增加实时流式响应、Markdown 渲染支持以及 UI 改进',

@@ -1,17 +1,7 @@
 :root {
-  --primary-color: #4a90e2;
-  --primary-hover: #357abd;
   --bg-color: #f5f7fa;
-  --card-bg: #ffffff;
   --text-main: #2c3e50;
   --text-secondary: #7f8c8d;
-  --border-radius: 8px;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.15);
-  --danger: #e74c3c;
-  --success: #2ecc71;
-  --warning: #f1c40f;
-  --max-width: 1200px;
 }
 
 * {
@@ -29,10 +19,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-button {
-  font-family: inherit;
-}
-
 /* Scrollbar beautification */
 ::-webkit-scrollbar {
   width: 8px;
@@ -48,27 +34,15 @@ button {
   background: #bbb;
 }
 
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 20px;
+/* Markdown Styles Override */
+.markdown-body {
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  line-height: 1.6;
 }
 
-.btn {
-  padding: 12px;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn:hover {
-  background: var(--primary-hover);
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  border-bottom: none;
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useIdeaStore } from '../stores/idea'
 import { storeToRefs } from 'pinia'
+import { Search } from '@element-plus/icons-vue'
 
 const store = useIdeaStore()
 const { filter, allTags } = storeToRefs(store)
@@ -17,35 +18,50 @@ const COLORS = [
 </script>
 
 <template>
-  <section class="controls">
-    <div class="search-box">
-      <input type="text" v-model="filter.search" placeholder="搜索标题或内容...">
+  <el-card shadow="hover" class="filter-card">
+    <div class="controls">
+      <div class="search-box">
+        <el-input 
+          v-model="filter.search" 
+          placeholder="搜索标题或内容..." 
+          :prefix-icon="Search"
+          clearable
+        />
+      </div>
+      <div class="filter-group">
+        <el-select v-model="filter.color" placeholder="选择颜色" style="width: 140px;">
+          <el-option label="所有颜色" value="all" />
+          <el-option 
+            v-for="c in COLORS" 
+            :key="c.value" 
+            :label="c.name" 
+            :value="c.value"
+          >
+            <div class="color-option">
+              <span class="color-dot" :style="{ backgroundColor: c.value }"></span>
+              <span>{{ c.name }}</span>
+            </div>
+          </el-option>
+        </el-select>
+        
+        <el-select v-model="filter.tag" placeholder="选择标签" style="width: 140px;">
+          <el-option label="所有标签" value="all" />
+          <el-option v-for="tag in allTags" :key="tag" :label="tag" :value="tag" />
+        </el-select>
+      </div>
     </div>
-    <div class="filter-group">
-      <select v-model="filter.color">
-        <option value="all">所有颜色</option>
-        <option v-for="c in COLORS" :key="c.value" :value="c.value" :style="{ backgroundColor: c.value }">
-          {{ c.name }}
-        </option>
-      </select>
-      <select v-model="filter.tag">
-        <option value="all">所有标签</option>
-        <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
-      </select>
-    </div>
-  </section>
+  </el-card>
 </template>
 
 <style scoped>
+.filter-card {
+  margin-bottom: 20px;
+}
+
 .controls {
   display: flex;
   gap: 15px;
-  margin-bottom: 30px;
   flex-wrap: wrap;
-  background: var(--card-bg);
-  padding: 15px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
   align-items: center;
 }
 
@@ -54,25 +70,22 @@ const COLORS = [
   min-width: 200px;
 }
 
-.search-box input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
 .filter-group {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-select {
-  padding: 10px;
+.color-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  cursor: pointer;
 }
 </style>

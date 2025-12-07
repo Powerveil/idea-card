@@ -10,6 +10,8 @@
     "report": "vite-bundle-visualizer"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "element-plus": "^2.12.0",
     "pinia": "^2.1.7",
     "vditor": "^3.11.2",
     "vue": "^3.4.21",
@@ -19,7 +21,10 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
     "rollup-plugin-visualizer": "^5.12.0",
+    "sass": "^1.94.2",
     "typescript": "^5.2.2",
+    "unplugin-auto-import": "^20.3.0",
+    "unplugin-vue-components": "^30.0.0",
     "vite": "^5.2.0",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^0.19.8",
